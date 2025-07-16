@@ -1,0 +1,12 @@
+ttkbootstrap>=1.5
+python-dotenv>=1.0
+requests>=2.31
+pyodbc>=5.0
+pywin32>=306
+Pillow>=10.3
+PyPDF2>=3.0
+reportlab>=4.0
+pdf2image>=1.17
+pymupdf>=1.23
+pytest>=8.2
+responses>=0.25
