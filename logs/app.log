@@ -138,3 +138,7 @@
 2025-07-17 09:48:22,713 - INFO - services.picker_service - 56 pedidos cargados
 2025-07-17 10:00:21,092 - INFO - services.picker_service - 56 pedidos cargados
 2025-07-17 10:12:22,307 - INFO - services.picker_service - 57 pedidos cargados
+2025-07-17 11:39:24,181 - INFO - services.picker_service - Access token refrescado; seller_id=209611492
+2025-07-17 11:39:56,348 - INFO - services.picker_service - 65 pedidos cargados
+2025-07-17 11:40:35,505 - INFO - services.picker_service - Access token refrescado; seller_id=209611492
+2025-07-17 11:41:05,654 - INFO - services.picker_service - 65 pedidos cargados

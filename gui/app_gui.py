@@ -179,8 +179,9 @@ class App(tb.Window):
                     self.order_list.highlight_order(pack_id, color='violet')
 
             ent.delete(0, END)
+        ent.bind('<Return>', lambda e: process())
 
-        def load_orders(self) -> None:
+    def load_orders(self) -> None:
         date_from_str = self.entry_from.get()
         date_to_str = self.entry_to.get()
         try:
