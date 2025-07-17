@@ -128,3 +128,13 @@
 2025-07-16 15:02:10,523 - INFO - services.picker_service - 73 pedidos cargados
 2025-07-16 15:05:11,372 - INFO - services.picker_service - Access token refrescado; seller_id=209611492
 2025-07-16 15:06:00,109 - INFO - services.picker_service - 74 pedidos cargados
+2025-07-16 16:33:22,554 - INFO - services.picker_service - Access token refrescado; seller_id=209611492
+2025-07-16 16:33:59,017 - INFO - services.picker_service - 77 pedidos cargados
+2025-07-16 16:35:18,476 - INFO - services.picker_service - 77 pedidos cargados
+2025-07-16 17:01:30,951 - INFO - services.picker_service - Access token refrescado; seller_id=209611492
+2025-07-16 17:02:08,881 - INFO - services.picker_service - 78 pedidos cargados
+2025-07-17 09:44:20,735 - INFO - services.picker_service - Access token refrescado; seller_id=209611492
+2025-07-17 09:44:47,124 - INFO - services.picker_service - 54 pedidos cargados
+2025-07-17 09:48:22,713 - INFO - services.picker_service - 56 pedidos cargados
+2025-07-17 10:00:21,092 - INFO - services.picker_service - 56 pedidos cargados
+2025-07-17 10:12:22,307 - INFO - services.picker_service - 57 pedidos cargados

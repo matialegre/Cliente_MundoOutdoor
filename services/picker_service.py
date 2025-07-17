@@ -29,13 +29,12 @@ class PickerService:
     def __init__(self) -> None:
         # state for pick session
         self._session_active: bool = False
-        # unidades pendientes: (Order, item_index, unit_idx)
         self._pending_units: list[tuple[Order, int, int]] = []
-        # unidades pickeadas
         self._picked_units: list[tuple[Order, int, int]] = []
         self.access_token: str | None = None
         self.seller_id: str | None = None
         self.orders: list[Order] = []
+        self.last_pack_id: str | None = None   # ← línea añadida
 
     def _ensure_token(self) -> None:
         if self.access_token is None:
@@ -131,6 +130,20 @@ class PickerService:
             "ARTDES": row.ARTDES,
         }
 
+    # --------------------------------------------------------------
+    #  Resumen de unidades pendientes por pack
+    # --------------------------------------------------------------
+    def pending_units_summary(self, pack_id: str) -> list[str]:
+        """Devuelve lista de strings 'SKU – unidad X/Y' aún pendientes en pack_id."""
+        summary: list[str] = []
+        for ord_obj, idx_item, unit_idx in self._pending_units:
+            if (ord_obj.pack_id or ord_obj.id) != pack_id:
+                continue
+            item = ord_obj.items[idx_item]
+            summary.append(f"{item.sku} – {unit_idx + 1}/{item.quantity}")
+        return summary
+
+
     def send_stock_movement(self, pedido_id: int | str, barcode: str, cantidad: int = 1) -> tuple[bool, str]:
         """Envía movimiento de stock a la API Dragonfish."""
         datos = self.get_article_data(barcode) or {}
@@ -219,6 +232,7 @@ class PickerService:
                 # Cuando ya se pickearon todas las unidades de un pedido, imprimir etiqueta
                 label_ok = False
                 pack_id = ord_obj.pack_id or ord_obj.id
+                self.last_pack_id = pack_id                    # ➊ NUEVA línea
                 pending_same_pack = [p for p in self._pending_units if (p[0].pack_id or p[0].id) == pack_id]
                 log.debug("Pack %s: pendientes %d", pack_id, len(pending_same_pack))
                 if not pending_same_pack and ord_obj.shipping_id:

@@ -165,17 +165,22 @@ class App(tb.Window):
             lbl_msg.configure(text=msg, fg='#00e676' if ok else '#ff5252')
             # Limpiar mensaje luego de 3 s
             win.after(3000, lambda: lbl_msg.configure(text=""))
+
             if ok:
-                # Resaltar pedido completado
-                for o in self.service.orders:
-                    if o.shipping_id and all(
-                        (u[0] is not o) for u in self.service._pending_units):
-                        self.order_list.highlight_order(o.pack_id or o.id)
+                pack_id = self.service.last_pack_id
+                pend = self.service.pending_units_summary(pack_id) if pack_id else []
+                if pend:  # aún faltan unidades del mismo pack
+                    dialogs.Messagebox.show_info("Pendientes", "Faltan:\n" + "\n".join(pend))
+                    # resaltar pedidos pendientes en azul
+                    for o in self.service.orders:
+                        if (o.pack_id or o.id) == pack_id:
+                            self.order_list.highlight_order(o.pack_id or o.id, color='#2196f3')
+                else:      # pack completo
+                    self.order_list.highlight_order(pack_id, color='violet')
+
             ent.delete(0, END)
 
-        ent.bind('\u003cReturn\u003e', lambda e: process())
-
-    def load_orders(self) -> None:
+        def load_orders(self) -> None:
         date_from_str = self.entry_from.get()
         date_to_str = self.entry_to.get()
         try:
@@ -214,46 +219,46 @@ class App(tb.Window):
         # Rango de fechas ingresado por el usuario
         try:
             date_from = datetime.strptime(self.var_from.get(), "%d/%m/%Y").date()
-            date_to = datetime.strptime(self.var_to.get(), "%d/%m/%Y").date()
+            date_to   = datetime.strptime(self.var_to.get(), "%d/%m/%Y").date()
         except ValueError:
-            date_from = None
-            date_to = None
+            date_from = date_to = None
 
+        allow_printed = self.var_include_printed.get()
         filtered = []
         for o in orders:
-            # Convertimos fecha de creación a Argentina (-3)
+            # ----- filtro por fecha local -----
             try:
-                dt_created = datetime.fromisoformat(o.date_created.replace('Z', '+00:00')).astimezone(timezone(timedelta(hours=-3)))
+                dt_created = datetime.fromisoformat(
+                    o.date_created.replace('Z', '+00:00')
+                ).astimezone(timezone(timedelta(hours=-3)))
             except Exception:
                 dt_created = None
-
-            # Filtro por fecha exacta local
             if date_from and date_to and dt_created:
                 if not (date_from <= dt_created.date() <= date_to):
                     continue
-
-            # Filtro hasta 13 hs si se seleccionó
+            # ----- filtro hasta las 13:00 -----
             if self.var_until_13.get() and dt_created and dt_created.hour >= 13:
                 continue
-            # filtro por nota
+            # ----- filtro por nota -----
             note_up = (o.notes or '').upper()
             if not any(k in note_up for k in KEYWORDS_NOTE):
                 continue
-            # Sólo mostrar LISTA PARA IMPRIMIR (ready_to_print o '')
-            # Si está activado "Incluir impresos", también permitir 'printed'.
+            # =========================================================
+            #  ÚNICO filtro que nos interesa:
+            #  solo substatus "ready_to_print"; permitir "printed"
+            #  únicamente si el usuario marcó "incluir impresos".
+            # =========================================================
             sub = (o.shipping_substatus or '').lower()
-            status = (o.shipping_status or '').lower()
-            allow_printed = self.var_include_printed.get()
-            # Excluir si el envío está despachado / en camino
-            if status in ('shipped', 'delivered', 'in_transit', 'in_process', 'ready_to_ship', 'handling', 'pending', 'to_be_agreed', 'ready_to_pickup'):
+            if sub == 'ready_to_print':
+                filtered.append(o)
                 continue
-            # Manejo de substatus
-            if sub in ('printed',) and not allow_printed:
+            if allow_printed and sub == 'printed':
+                filtered.append(o)
                 continue
-            if sub not in ('ready_to_print', '') and not (allow_printed and sub == 'printed'):
-                continue
-            filtered.append(o)
+            # todo lo demás se descarta (incluye 'en camino')
+            continue
         self.order_list.set_orders(filtered)
+
 
 
 def launch_gui() -> None:
