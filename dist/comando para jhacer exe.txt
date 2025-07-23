@@ -1,0 +1,8 @@
+pyinstaller --onefile --console --name "Cliente_Matias_GUI_v3" --add-data ".env;." --add-data "api;api" --add-data "services;services" --add-data "models;models" --add-data "utils;utils" --add-data "printing;printing" --hidden-import "ttkbootstrap" --hidden-import "requests" --hidden-import "python-dotenv" --hidden-import "tkinter" --clean gui/app_gui_v3.py
+
+
+tengo rpboelma con estas 3 zapatillas:
+
+1)EL CODIGO DE BARRA ES NMIDKUDZDWNN038 O  nmidkudzdwnn038 pero el SKU EN MELI ES NMIDKUDZDW-NNO-T38 Y DICE 
+NMIDKTDZHVNN039
+NMIDKUDZDWMTP40

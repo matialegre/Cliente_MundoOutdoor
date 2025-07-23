@@ -113,6 +113,14 @@ class OrderList(tk.Frame):
                     child.configure(bg=color)
                 break
 
+    def needs_update(self, new_orders: List[Order]) -> bool:
+        """Devuelve True si la lista de pedidos cambió en tamaño o IDs."""
+        if len(new_orders) != len(self._orders):
+            return True
+        curr_ids = [o.pack_id or o.id for o in self._orders]
+        new_ids = [o.pack_id or o.id for o in new_orders]
+        return curr_ids != new_ids
+
     def set_orders(self, orders: List[Order]) -> None:
         # Calcular packs duplicados para resaltar
         pack_counts = {}

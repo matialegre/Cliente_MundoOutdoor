@@ -75,3 +75,44 @@ def get_shipment_substatus(shipping_id: int | None, access_token: str) -> str | 
     if resp.status_code != 200:
         return None
     return resp.json().get("substatus")
+
+def get_pack_orders(pack_id: int | str, access_token: str) -> List[int] | None:
+    """Obtiene todas las order_id que pertenecen a un pack_id.
+    
+    Retorna una lista de order_ids o None si hay error.
+    """
+    if not pack_id:
+        return None
+    
+    url = f"{BASE_URL}/packs/{pack_id}"
+    resp = requests.get(url, headers={"Authorization": f"Bearer {access_token}"})
+    
+    if resp.status_code != 200:
+        log.warning("Error obteniendo pack %s: %s", pack_id, resp.status_code)
+        return None
+    
+    pack_data = resp.json()
+    orders = pack_data.get("orders", [])
+    
+    # Extraer solo los IDs de las órdenes
+    order_ids = [order["id"] for order in orders if "id" in order]
+    
+    log.debug("Pack %s contiene %d órdenes: %s", pack_id, len(order_ids), order_ids)
+    return order_ids
+
+def get_order_details(order_id: int | str, access_token: str) -> Dict | None:
+    """Obtiene los detalles completos de una orden específica.
+    
+    Retorna el JSON de la orden o None si hay error.
+    """
+    if not order_id:
+        return None
+        
+    url = f"{BASE_URL}/orders/{order_id}"
+    resp = requests.get(url, headers={"Authorization": f"Bearer {access_token}"})
+    
+    if resp.status_code != 200:
+        log.warning("Error obteniendo orden %s: %s", order_id, resp.status_code)
+        return None
+        
+    return resp.json()

@@ -10,6 +10,11 @@ class Item:
     quantity: int
     barcode: str | None = None
     sku: str | None = None
+    size: str | None = None
+    color: str | None = None
+    real_sku: str | None = None  # SKU real resuelto para productos OUT
+    item_id: str | None = None   # ID del item en ML
+    variation_id: str | None = None  # ID de la variación en ML
 
 @dataclass
 class Order:
@@ -25,17 +30,33 @@ class Order:
 
     @classmethod
     def from_api(cls, data: Dict) -> "Order":
-        items = [
-            Item(
-                id=it.get("id") or it.get("item", {}).get("id"),
-                title=it.get("title") or it.get("item", {}).get("title", ""),
+        items = []
+        for it in data.get("order_items", []):
+            # Extraer talla/color si vienen en variation_attributes
+            size = color = None
+            for attr in it.get("item", {}).get("variation_attributes", []):
+                if attr.get("id") in ("SIZE", "TALLE"):
+                    size = attr.get("value_name")
+                if attr.get("id") == "COLOR":
+                    color = attr.get("value_name")
+            # Extraer item_id y variation_id
+            item_data = it.get("item", {})
+            item_id = str(item_data.get("id", "")) if item_data.get("id") else None
+            variation_id = str(item_data.get("variation_id", "")) if item_data.get("variation_id") else None
+            
+            items.append(Item(
+                id=it.get("id") or item_data.get("id"),
+                title=it.get("title") or item_data.get("title", ""),
                 quantity=it["quantity"],
                 barcode=it.get("barcode"),
                 sku=(it.get("seller_sku") or it.get("seller_custom_field") or
-                     it.get("item", {}).get("seller_sku") or it.get("item", {}).get("seller_custom_field")),
-            )
-            for it in data.get("order_items", [])
-        ]
+                     item_data.get("seller_sku") or item_data.get("seller_custom_field")),
+                size=size,
+                color=color,
+                item_id=item_id,
+                variation_id=variation_id,
+                real_sku=None,  # Se resolverá después
+            ))
         return cls(
             id=data["id"],
             date_created=data["date_created"],
